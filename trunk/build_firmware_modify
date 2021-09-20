@@ -6,7 +6,6 @@ if [ -z "$1" ] || [ "$EUID" != 0 ]; then
 	exit 1
 fi
 
-if [ -z "$2" ];then
 if [ ! -f configs/templates/$1.config ] ; then
 	echo "configs/templates/$1.config not found!"
 	exit 1
@@ -30,8 +29,8 @@ echo "CONFIG_FIRMWARE_INCLUDE_SSOBFS=y" >> .config #simple-obfs混淆插件
 ##科学上网##
 
 ##广告管理##
-echo "CONFIG_FIRMWARE_INCLUDE_ADBYBY=n" >> .config #adbyby plus+
-echo "CONFIG_FIRMWARE_INCLUDE_KOOLPROXY=n" >> .config #KP广告过滤
+echo "CONFIG_FIRMWARE_INCLUDE_ADBYBY=y" >> .config #adbyby plus+
+echo "CONFIG_FIRMWARE_INCLUDE_KOOLPROXY=y" >> .config #KP广告过滤
 ##广告管理##
 
 ##DNS服务##
