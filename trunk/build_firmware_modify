@@ -6,12 +6,23 @@ if [ -z "$1" ] || [ "$EUID" != 0 ]; then
 	exit 1
 fi
 
+if [ -z "$2" ];then
 if [ ! -f configs/templates/$1.config ] ; then
 	echo "configs/templates/$1.config not found!"
 	exit 1
 fi
 
 cp -f configs/templates/$1.config .config
+
+sed -i 's/CONFIG_FIRMWARE_INCLUDE_DNSFORWARDER=y/CONFIG_FIRMWARE_INCLUDE_DNSFORWARDER=n/g' .config
+sed -i 's/CONFIG_FIRMWARE_INCLUDE_MENTOHUST=y/CONFIG_FIRMWARE_INCLUDE_MENTOHUST=n/g' .config
+sed -i 's/CONFIG_FIRMWARE_INCLUDE_SCUTCLIENT=y/CONFIG_FIRMWARE_INCLUDE_SCUTCLIENT=n/g' .config
+sed -i 's/CONFIG_FIRMWARE_INCLUDE_SRELAY=y/CONFIG_FIRMWARE_INCLUDE_SRELAY=n/g' .config
+sed -i 's/CONFIG_FIRMWARE_INCLUDE_SHADOWSOCKS=y/CONFIG_FIRMWARE_INCLUDE_SHADOWSOCKS=n/g' .config
+
+sed -i 's/CONFIG_FIRMWARE_INCLUDE_OPENSSL_EXE=n/CONFIG_FIRMWARE_INCLUDE_OPENSSL_EXE=y/g' .config
+
+fi
 
 ROOTDIR=`pwd`
 export ROOTDIR=$ROOTDIR
@@ -138,7 +149,7 @@ rm -rf "$dir_wifi_dst/mt7915"
 mkdir -p "$dir_wifi_dst/mt76x3"
 cp -f "$dir_wifi_src/rtpci/4.1.X.X/mt76x3/Kconfig" "$dir_wifi_dst/mt76x3/Kconfig"
 mkdir -p "$dir_wifi_dst/mt7615/embedded"
-cp -f "$dir_wifi_src/rtpci/5.0.5.1/mt7615/embedded/Kconfig" "$dir_wifi_dst/mt7615/embedded/Kconfig"
+cp -f "$dir_wifi_src/rtpci/5.0.4.0/mt7615/embedded/Kconfig" "$dir_wifi_dst/mt7615/embedded/Kconfig"
 mkdir -p "$dir_wifi_dst/mt7915/embedded"
 cp -f "$dir_wifi_src/rtpci/7.3.0.1/mt7915/embedded/Kconfig" "$dir_wifi_dst/mt7915/embedded/Kconfig"
 
@@ -210,7 +221,7 @@ if [ -n "$CONFIG_MT7628_AP" ] ; then
 	cp -rfL "$dir_wifi_src/rtsoc/$dir_wifi_ver/mt7628_ap" "$dir_wifi_dst/"
 fi
 if [ -n "$CONFIG_MT7615_AP" ] ; then
-	dir_wifi_ver="5.0.5.1"
+	dir_wifi_ver="5.0.4.0"
 	if [ "$CONFIG_FIRMWARE_WIFI_DRIVER" = "4.4.2.1" ] || \
 		[ "$CONFIG_FIRMWARE_WIFI2_DRIVER" = "4.4.2.1" ] || \
 		[ "$CONFIG_FIRMWARE_WIFI5_DRIVER" = "4.4.2.1" ]; then
