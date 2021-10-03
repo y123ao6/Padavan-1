@@ -67,7 +67,7 @@ jobs:
           GIT_VERSION=`git rev-parse --short=7 HEAD 2>/dev/null` && [ -n "$GIT_VERSION" ] && \
           image_name=images超精简版_${build_variant}_${GIT_VERSION} || image_name=images超精简版_${build_variant}
           cd ${images_dir}; md5sum *.trx |tee md5sum.txt; 7z a -mx=9 ${image_name}.7z ./*
-          echo "image_name=超精简版_${image_name}" >> $GITHUB_ENV
+          echo "image_name=${image_name}" >> $GITHUB_ENV
       - name: Upload images to Artifact
         if: ${{ github.event_name != 'release' && success() }}
         uses: actions/upload-artifact@v2.2.1
