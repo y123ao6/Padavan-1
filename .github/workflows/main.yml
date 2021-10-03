@@ -65,15 +65,15 @@ jobs:
         run: |
           ls -lh ${images_dir}
           GIT_VERSION=`git rev-parse --short=7 HEAD 2>/dev/null` && [ -n "$GIT_VERSION" ] && \
-          image_name=images_超精简版_${build_variant}_${GIT_VERSION} || image_name=images_超精简版_${build_variant}
+          image_name=images超精简版_${build_variant}_${GIT_VERSION} || image_name=images超精简版_${build_variant}
           cd ${images_dir}; md5sum *.trx |tee md5sum.txt; 7z a -mx=9 ${image_name}.7z ./*
-          echo "image_name=${image_name}" >> $GITHUB_ENV
+          echo "image_name=超精简版_${image_name}" >> $GITHUB_ENV
       - name: Upload images to Artifact
         if: ${{ github.event_name != 'release' && success() }}
         uses: actions/upload-artifact@v2.2.1
         with:
-          name: ${{ env.image_name }}
-          path: ${{ env.images_dir }}/*.7z
+          name: 超精简版_${{ env.image_name }}
+          path: 超精简版_${{ env.images_dir }}/*.7z
       - name: Upload images to Releases
         if: ${{ github.event_name == 'release' && success() }}
         uses: svenstaro/upload-release-action@2.2.0
