@@ -1,4 +1,4 @@
-name: CI
+name: 超精简版_CI
 
 # Controls when the action will run. 
 on: 
@@ -72,7 +72,7 @@ jobs:
         if: ${{ github.event_name != 'release' && success() }}
         uses: actions/upload-artifact@v2.2.1
         with:
-          name: ${{ env.image_name }}
+          name: 超精简版_${{ env.image_name }}
           path: ${{ env.images_dir }}/*.7z
       - name: Upload images to Releases
         if: ${{ github.event_name == 'release' && success() }}
