@@ -1,4 +1,4 @@
-name: 超精简版_CI
+name: CI
 
 # Controls when the action will run. 
 on: 
