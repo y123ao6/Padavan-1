@@ -73,7 +73,7 @@ jobs:
         uses: actions/upload-artifact@v2.2.1
         with:
           name: 超精简版_${{ env.image_name }}
-          path: ${{ env.images_dir }}/*.7z
+          path: 超精简版_${{ env.images_dir }}/*.7z
       - name: Upload images to Releases
         if: ${{ github.event_name == 'release' && success() }}
         uses: svenstaro/upload-release-action@2.2.0
