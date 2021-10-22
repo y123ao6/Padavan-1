@@ -1,42 +1,32 @@
-THISDIR = $(shell pwd)
-xray_dir="xray.com/core/main"
-export GO111MODULE=on
-export GOPROXY=https://goproxy.cn
-xray_SED_ARGS:=
-xray_SED_ARGS += \
-	s/_ "xray.com\/core\/main\/json"/\/\/ &/; \
-	/\/\/ _ "xray.com\/core\/main\/jsonem"/s/\/\/ //;
-xray_SED_ARGS += \
-	s/_ "xray.com\/core\/main\/json"/\/\/ &/;
-xray_VERSION := 1.5.0
-xray_URL := https://codeload.github.com/xtls/xray-core/tar.gz/v$(xray_VERSION)
+THISDIR := $(shell pwd)
+XRAY_URL_BASE := https://github.com/felix-fly/xray-openwrt/releases/latest/download/
 
-all:download_xray build_extract build_xray
+XRAY_NAME := xray-linux-mipsle
+XRAY_URL := $(XRAY_URL_BASE)/$(XRAY_NAME).tar.gz
 
-download_xray:
-	( if [ ! -f $(THISDIR)/Xray-core-$(xray_VERSION).tar.gz ]; then \
-	curl --create-dirs -L $(xray_URL) -o $(THISDIR)/Xray-core-$(xray_VERSION).tar.gz ; \
-	fi )
-	
-build_extract:
-	mkdir -p $(THISDIR)/xray.com
-	mkdir -p $(THISDIR)/bin
-	( if [ ! -d $(THISDIR)/xray.com/core ]; then \
-	tar zxfv $(THISDIR)/Xray-core-$(xray_VERSION).tar.gz -C $(THISDIR)/xray.com ; \
-	mv $(THISDIR)/xray.com/Xray-core-$(xray_VERSION) $(THISDIR)/xray.com/core ; \
+CERT_FILE := https://curl.se/ca/cacert.pem
+
+all: download_test extra_test
+	@echo "xray build done!"
+
+download_test:
+	( if [ ! -f $(XRAY_NAME).tar.gz ]; then \
+		wget -t5 --timeout=20 --no-check-certificate -O $(XRAY_NAME).tar.gz $(XRAY_URL); \
+		wget -t5 --timeout=20 --no-check-certificate $(CERT_FILE); \
 	fi )
 
-build_xray:
-	( cd $(THISDIR)/$(xray_dir); \
-	sed -i \
-			'$(xray_SED_ARGS)' \
-			distro/all/all.go ; \
-	GOOS=linux GOARCH=mipsle go build -ldflags "-s -w -buildid=" -o $(THISDIR)/bin/xray; \
-	)
-	
+extra_test:
+	( if [ ! -d $(XRAY_NAME) ]; then \
+		tar xf $(XRAY_NAME).tar.gz; \
+		rm xray; \
+		mv xray_softfloat xray; \
+	fi )
+
 clean:
-	rm -rf $(THISDIR)/xray.com
-	rm -rf $(THISDIR)/bin
-	
+	rm -rf $(XRAY_NAME).tar.gz
+
 romfs:
-	$(ROMFSINST) -p +x $(THISDIR)/bin/xray /usr/bin/v2ray
+ifeq ($(CONFIG_FIRMWARE_INCLUDE_XRAY),y)
+	$(ROMFSINST) -p +x $(THISDIR)/xray /usr/bin/xray
+	$(ROMFSINST) -p -x $(THISDIR)/cacert.pem /usr/lib/cacert.pem
+endif
