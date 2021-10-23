@@ -1,32 +1,43 @@
-THISDIR := $(shell pwd)
-V2RAY_URL_BASE := https://github.com/felix-fly/v2ray-openwrt/releases/latest/download/
+THISDIR = $(shell pwd)
+v2ray_dir="v2ray.com/core/main"
+export GO111MODULE=on
+export GOPROXY=https://goproxy.io
+V2ray_VERSION := 4.40.1
+V2ray_URL := https://github.com/felix-fly/v2ray-openwrt/releases/latest/download/
+V2RAY_SED_ARGS:=
+V2RAY_SED_ARGS += \
+	s/_ "v2ray.com\/core\/main\/json"/\/\/ &/; \
+	/\/\/ _ "v2ray.com\/core\/main\/jsonem"/s/\/\/ //;
+V2RAY_SED_ARGS += \
+	s/_ "v2ray.com\/core\/main\/json"/\/\/ &/;
 
-V2RAY_NAME := v2ray-linux-mipsle
-V2RAY_URL := $(V2RAY_URL_BASE)/$(V2RAY_NAME).tar.gz
+#all:download_v2 build_extract build_v2ray
+all:download_v2 
 
-CERT_FILE := https://curl.se/ca/cacert.pem
-
-all: download_test extra_test
-	@echo "v2ray build done!"
-
-download_test:
-	( if [ ! -f $(V2RAY_NAME).tar.gz ]; then \
-		wget -t5 --timeout=20 --no-check-certificate -O $(V2RAY_NAME).tar.gz $(V2RAY_URL); \
-		wget -t5 --timeout=20 --no-check-certificate $(CERT_FILE); \
+download_v2:
+	( if [ ! -f $(THISDIR)/v2ray-core-$(V2ray_VERSION).tar.gz ]; then \
+	curl --create-dirs -L $(V2ray_URL) -o $(THISDIR)/v2ray-core-$(V2ray_VERSION).tar.gz ; \
 	fi )
 
-extra_test:
-	( if [ ! -d $(V2RAY_NAME) ]; then \
-		tar xf $(V2RAY_NAME).tar.gz; \
-		rm v2ray; \
-		mv v2ray_softfloat v2ray; \
+build_extract:
+	mkdir -p $(THISDIR)/v2ray.com
+	mkdir -p $(THISDIR)/bin
+	( if [ ! -d $(THISDIR)/v2ray.com/core ]; then \
+	tar zxfv $(THISDIR)/v2ray-core-$(V2ray_VERSION).tar.gz -C $(THISDIR)/v2ray.com ; \
+	mv $(THISDIR)/v2ray.com/v2ray-core-$(V2ray_VERSION) $(THISDIR)/v2ray.com/core ; \
 	fi )
+
+build_v2ray:
+	( cd $(THISDIR)/$(v2ray_dir); \
+	sed -i \
+			'$(V2RAY_SED_ARGS)' \
+			distro/all/all.go ; \
+	GOOS=linux GOARCH=mipsle go build -ldflags "-w -s" -o $(THISDIR)/bin/v2ray; \
+	)
 
 clean:
-	rm -rf $(V2RAY_NAME).tar.gz
+	#rm -rf $(THISDIR)/v2ray.com
+	#rm -rf $(THISDIR)/bin
 
 romfs:
-ifeq ($(CONFIG_FIRMWARE_INCLUDE_V2RAY),y)
-	$(ROMFSINST) -p +x $(THISDIR)/v2ray /usr/bin/v2ray
-	$(ROMFSINST) -p -x $(THISDIR)/cacert.pem /usr/lib/cacert.pem
-endif
+	$(ROMFSINST) -p +x $(THISDIR)/bin/v2ray /usr/bin/v2ray
